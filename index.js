@@ -69,6 +69,7 @@ var addCounter = () => {
     }
 };
 
+var didWorkLastLoop = true;
 /**
  * hash next batch of files from the worklist.
  */
@@ -76,9 +77,17 @@ var hashNextBash = () => {
     var thisWorkList = workList;
     workList = [];
     if (thisWorkList.length === 0) {
-        console.log('work list empty.  Sleeping for 1 second');
-        setTimeout(hashNextBash, 1000);
+        if (didWorkLastLoop) {
+            console.log('work list empty.  Sleeping for 1 second');
+            setTimeout(hashNextBash, 1000);
+            didWorkLastLoop = false;
+        } else {
+            console.log('done working.  exiting');
+            writeLog();
+            process.exit(0);
+        }
     } else {
+        didWorkLastLoop = true;
         console.log(`processing ${thisWorkList.length} files`);
         async.eachLimit(thisWorkList, numCores, (filename, callback) => {
             if (completedFiles[filename]) {
