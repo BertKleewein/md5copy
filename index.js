@@ -44,6 +44,7 @@ var reportingInterval = 100;
 var completedFileCount = 0;
 
 var numCores = os.cpus().length;
+numCores=2;
 console.log(`running on ${numCores} cores`);
 
 /**
@@ -149,6 +150,6 @@ var readLog = () => {
 };
 
 readLog();
-setInterval(writeLog, 5000);
+setInterval(writeLog, 120000);
 startWalking();
 setTimeout(hashNextBash,1000);
