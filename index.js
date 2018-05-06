@@ -25,7 +25,6 @@ var workList = [];
 /**
  * hash->filename lookup
  */
-
 var hashList = {};
 
 /**
@@ -44,7 +43,7 @@ var reportingInterval = 100;
 var completedFileCount = 0;
 
 var numCores = os.cpus().length;
-numCores=2;
+numCores = 2;
 console.log(`running on ${numCores} cores`);
 
 /**
@@ -69,6 +68,24 @@ var addCounter = () => {
         console.log(`${completedFileCount} files completed`);
     }
 };
+
+var addFile = function(hash, filename) {
+    completedFiles[filename] = hash;
+    if (hashList[hash]) {
+        var found = false;
+        hashList[hash].forEach((foundFile) => {
+            if (filename === foundFile) {
+                found = true;
+            }
+        });
+        if (!found) {
+            hashList[hash].push(filename);
+        }
+    } else {
+        hashList[hash] = [ filename ];
+    }
+};
+
 
 var didWorkLastLoop = true;
 /**
@@ -101,15 +118,7 @@ var hashNextBash = () => {
                         addCounter();
                         callback();
                     } else {
-                        if (hashList[hash]) {
-                            if (hashList[hash] == filename) {
-                                // we've seen this.  skip
-                            } else {
-                                console.log(`${filename} is a duplicate of ${hashList[hash]}`);
-                            }
-                        } else {
-                            hashList[hash] = filename;
-                        }
+                        addFile(hash, filename);
                         addCounter();
                         callback();
                     }
@@ -143,9 +152,11 @@ var readLog = () => {
     } catch(e) {
 
     }
-    console.log(`read ${Object.keys(hashList).length} completed files`);
+    console.log(`read ${Object.keys(hashList).length} unique files`);
     Object.keys(hashList).forEach((key) => {
-        completedFiles[hashList[key]] = key;
+        hashList[key].forEach((filename) => {
+            completedFiles[filename] = key;
+        });
     });
 };
 
