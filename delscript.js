@@ -3,6 +3,7 @@
 /*jshint node:true */
 'use strict';
 
+var path = require('path');
 var fs = require('fs');
 var args = require('yargs')
     .usage('$0 --keepjson [keepjson] --erasejson [erasejson]')
@@ -18,10 +19,15 @@ var erase = JSON.parse(fs.readFileSync(args.erasejson).toString());
 Object.keys(keep).forEach(hash => {
     if (erase[hash]) {
         erase[hash].forEach(filename => {
-            console.log(`del "$filename`);
+            console.log('del "' + filename + '"');
         });
         delete erase[hash];
     }
 });
 
-fs.writeFileSync(args.eraseJson + '.new', JSON.stringify(erase, null, '  '));
+var saveFile = path.parse(args.erasejson);
+saveFile.name += '-new';
+delete saveFile.base;
+var saveFileName = path.format(saveFile);
+console.log('rem saving to ' + saveFileName);
+fs.writeFileSync(saveFileName, JSON.stringify(erase, null, '  '));
