@@ -107,7 +107,7 @@ var hashNextBash = () => {
     } else {
         didWorkLastLoop = true;
         console.log(`processing ${thisWorkList.length} files`);
-        async.eachLimit(thisWorkList, numCores, (filename, callback) => {
+        async.eachLimit(thisWorkList, 1, (filename, callback) => {
             if (completedFiles[filename]) {
                 addCounter();
                 process.nextTick(callback);
@@ -160,7 +160,33 @@ var readLog = () => {
     });
 };
 
+/**
+ * clear out deleted files
+ */
+var clearDeletedFiles = () => {
+    Object.keys(completedFiles).forEach((filename) => {
+        try {
+            fs.statSync(filename);
+        } catch(e) {
+            console.log(`${filename} was deleted`);
+            var hash = completedFiles[filename];
+            delete completedFiles[filename];
+
+            var index = hashList[hash].indexOf(filename);
+            if (index > -1) {
+                hashList[hash].splice(index,1);
+                if (hashList[hash].length === 0) {
+                    delete hashList[hash];
+                }
+            } else {
+                throw new Error(`unexpected - ${filename} is in completedFiles but not hashList`);
+            }
+        }
+    });
+};
+
 readLog();
+clearDeletedFiles()
 setInterval(writeLog, 120000);
 startWalking();
 setTimeout(hashNextBash,1000);
