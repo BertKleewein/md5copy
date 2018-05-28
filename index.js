@@ -110,7 +110,7 @@ var hashNextBash = () => {
         async.eachLimit(thisWorkList, numCores, (filename, callback) => {
             if (completedFiles[filename]) {
                 addCounter();
-                callback();
+                process.nextTick(callback);
             } else {
                 md5File(filename, (err, hash) => {
                     if (err) {
